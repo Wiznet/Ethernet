@@ -48,6 +48,50 @@
 //#define ETHERNET_LARGE_BUFFERS
 
 
+#define PRINTLINE()       \
+Serial.print("\r\n");     \
+Serial.print(__FILE__);   \
+Serial.print(" ");        \
+Serial.println(__LINE__);
+
+#define PRINTVAR_HEX(var) \
+Serial.print("\r\n");     \
+Serial.print(__FILE__);   \
+Serial.print(" ");        \
+Serial.println(__LINE__); \
+Serial.print("PRINTVAR_HEX("#var")"); \
+Serial.print(" = 0x");    \
+Serial.println(var, HEX);  
+
+#define PRINTVAR_HEXT(var1, var2, var3) \
+Serial.print("\r\n");     \
+Serial.print(__FILE__);   \
+Serial.print(" ");        \
+Serial.println(__LINE__); \
+Serial.print("PRINTVAR_HEXT("#var1", "#var2", "#var3")"); \
+Serial.print(" = 0x");    \
+Serial.print(var1, HEX);  \
+Serial.print(" = 0x");    \
+Serial.print(var2, HEX);  \
+Serial.print(" = 0x");    \
+Serial.println(var3, HEX);  
+
+#define PRINTVAR(var)     \
+Serial.print("\r\n");     \
+Serial.print(__FILE__);   \
+Serial.print(" ");        \
+Serial.println(__LINE__); \
+Serial.print("PRINTVAR("#var")"); \
+Serial.print(" = ");      \
+Serial.println(var);  
+
+#define PRINTSTR(var)      \
+Serial.print("\r\n");     \
+Serial.print(__FILE__);   \
+Serial.print(" ");        \
+Serial.println(__LINE__); \
+Serial.println("PRINTVAR_STR("#var")");
+
 #include <Arduino.h>
 #include "Client.h"
 #include "Server.h"
@@ -64,7 +108,8 @@ enum EthernetHardwareStatus {
 	EthernetW5100,
 	EthernetW5200,
 	EthernetW5500,
-	EthernetW5100S
+	EthernetW5100S,
+	EthernetW6100
 };
 
 class EthernetUDP;

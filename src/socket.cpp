@@ -22,6 +22,9 @@
 #include "Ethernet.h"
 #include "utility/w5100.h"
 
+//#define DEBUG_SOCKET_CPP_WRITE_DATA
+//#define DEBUG_SOCKET_CPP_SOCKETLISTEN
+
 #if ARDUINO >= 156 && !defined(ARDUINO_ARCH_PIC32)
 extern void yield(void);
 #else
@@ -75,6 +78,11 @@ uint8_t EthernetClass::socketBegin(uint8_t protocol, uint16_t port)
 	// look at all the hardware sockets, use any that are closed (unused)
 	for (s=0; s < maxindex; s++) {
 		status[s] = W5100.readSnSR(s);
+
+		#if defined DEBUG_SOCKET_CPP
+		//PRINTVAR_HEX(status[s]);
+		#endif
+
 		if (status[s] == SnSR::CLOSED) goto makesocket;
 	}
 	//Serial.printf("W5000socket step2\n");
@@ -224,6 +232,11 @@ uint8_t EthernetClass::socketListen(uint8_t s)
 		SPI.endTransaction();
 		return 0;
 	}
+
+	#if defined DEBUG_SOCKET_CPP_SOCKETLISTEN
+	PRINTSTR("socketListen");
+	#endif
+
 	W5100.execCmdSn(s, Sock_LISTEN);
 	SPI.endTransaction();
 	return 1;
@@ -397,12 +410,33 @@ static uint16_t getSnTX_FSR(uint8_t s)
 
 static void write_data(uint8_t s, uint16_t data_offset, const uint8_t *data, uint16_t len)
 {
+	#if defined DEBUG_SOCKET_CPP_WRITE_DATA
+	PRINTSTR("write_data");
+	#endif
+
 	uint16_t ptr = W5100.readSnTX_WR(s);
+	#if defined DEBUG_SOCKET_CPP_WRITE_DATA
+	PRINTVAR_HEX(ptr);
+	PRINTVAR_HEX(data_offset);
+	#endif
 	ptr += data_offset;
 	uint16_t offset = ptr & W5100.SMASK;
 	uint16_t dstAddr = offset + W5100.SBASE(s);
 
+	#if defined DEBUG_SOCKET_CPP_WRITE_DATA
+	PRINTVAR_HEX(dstAddr);
+	PRINTVAR_HEX(W5100.SBASE(s));
+	#endif
+
+	#if defined DEBUG_SOCKET_CPP_WRITE_DATA
+	PRINTVAR_HEX(offset);
+	PRINTVAR_HEXT(s, data_offset, len);
+	#endif
+
 	if (W5100.hasOffsetAddressMapping() || offset + len <= W5100.SSIZE) {
+		#if defined DEBUG_SOCKET_CPP_WRITE_DATA
+		PRINTVAR_HEXT(dstAddr, *data, len);
+		#endif
 		W5100.write(dstAddr, data, len);
 	} else {
 		// Wrap around circular buffer
