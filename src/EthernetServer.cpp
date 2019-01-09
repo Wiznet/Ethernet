@@ -54,6 +54,7 @@ EthernetClient EthernetServer::available()
 			if (stat == SnSR::ESTABLISHED || stat == SnSR::CLOSE_WAIT) {
 				if (Ethernet.socketRecvAvailable(i) > 0) {
 					sockindex = i;
+					//PRINTVAR(stat);
 				} else {
 					// remote host closed connection, our end still open
 					if (stat == SnSR::CLOSE_WAIT) {

@@ -87,6 +87,7 @@ void EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress g
 	W5100.setIPAddress(ip._address.bytes);
 	W5100.setGatewayIp(gateway._address.bytes);
 	W5100.setSubnetMask(subnet._address.bytes);
+
 #else
 	W5100.setIPAddress(ip._address);
 	W5100.setGatewayIp(gateway._address);
@@ -118,6 +119,7 @@ EthernetHardwareStatus EthernetClass::hardwareStatus()
 		case 51: return EthernetW5100;
 		case 52: return EthernetW5200;
 		case 55: return EthernetW5500;
+		case 61: return EthernetW6100;
 		default: return EthernetNoHardware;
 	}
 }
