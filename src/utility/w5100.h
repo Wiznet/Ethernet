@@ -185,14 +185,9 @@ uint8_t temp_new;
 
 #define W6100_COMMON_BASE_ADDR	(0x0000)
 #define W6100_SOCKET_BASE_ADDR	(0x6000)
-#define W6100_SOCKET_NUM(_s)    (_s<<10)
-#if 0
-#define W6100_TX_BASE_ADDR	    (2<<13)
-#define W6100_RX_BASE_ADDR	    (3<<13)
-#else
 #define W6100_TX_BASE_ADDR	    (0x8000)
 #define W6100_RX_BASE_ADDR	    (0xC000)
-#endif
+#define W6100_SOCKET_NUM(_s)    (_s<<10)
 
 #define W6100_CHPLCKR_UNLOCK	0xCE
 #define W6100_NETLCKR_UNLOCK	0x3A
