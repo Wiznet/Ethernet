@@ -110,12 +110,10 @@ void loop() {
     if (client.available() > 0) {
       // read the bytes incoming from the client:
       char thisChar = client.read();
-
       // echo the bytes back to the client:
       server.write(thisChar);
-
       // echo the bytes to the server as well:
-      Serial.write(thisChar);   // Read Check
+      Serial.write(thisChar);
     }
   }
 }
