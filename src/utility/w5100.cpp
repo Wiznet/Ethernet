@@ -113,8 +113,7 @@ uint8_t W5100Class::init(void)
 	// until the reset pulse is ended.  If your hardware has a shorter
 	// reset time, this can be edited or removed.
 	delay(560);
-	Serial.println("w5100 init");
-
+	
 	CH_SIZE = 0x0100;	// Default except W6100
 
 	SPI.begin();

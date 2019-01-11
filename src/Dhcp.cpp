@@ -6,10 +6,10 @@
 #include "Dhcp.h"
 #include "utility/w5100.h"
 
-#define DEBUG_DHCP_CPP_BEGINWITHDHCP
-#define DEBUG_DHCP_CPP_DHCP_LEASE
-#define DEBUG_DHCP_CPP_DHCP_MESSAGE
-#define DEBUG_DHCP_CPP_DHCPRESPONSE
+//#define DEBUG_DHCP_CPP_BEGINWITHDHCP
+//#define DEBUG_DHCP_CPP_DHCP_LEASE
+//#define DEBUG_DHCP_CPP_DHCP_MESSAGE
+//#define DEBUG_DHCP_CPP_DHCPRESPONSE
 
 int DhcpClass::beginWithDHCP(uint8_t *mac, unsigned long timeout, unsigned long responseTimeout)
 {

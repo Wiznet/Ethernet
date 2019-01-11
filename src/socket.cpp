@@ -72,7 +72,6 @@ uint8_t EthernetClass::socketBegin(uint8_t protocol, uint16_t port)
 
 	// first check hardware compatibility
 	chip = W5100.getChip();
-	PRINTVAR(chip);
 	if (!chip) return MAX_SOCK_NUM; // immediate error if no hardware detected
 #if MAX_SOCK_NUM > 4
 	if (chip == 51 || chip == 50) maxindex = 4; // W5100 chip never supports more than 4 sockets

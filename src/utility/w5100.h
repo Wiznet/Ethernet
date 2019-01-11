@@ -18,6 +18,8 @@
 #include <SPI.h>
 
 //#define DEBUG_W5100_H
+//#define DEBUG_W5100_H_WRITESN
+//#define DEBUG_W5100_H_READSN
 
 // Safe for all chips
 #define SPI_ETHERNET_SETTINGS SPISettings(14000000, MSBFIRST, SPI_MODE0)
@@ -332,7 +334,7 @@ private:
   static uint16_t CH_SIZE;
 
   static inline uint8_t readSn(SOCKET s, uint16_t addr) {
-    #ifdef DEBUG_W5100_H
+    #ifdef DEBUG_W5100_H_READSN
     PRINTVAR_HEX(s);
     PRINTVAR_HEX(addr);
     PRINTVAR_HEX(CH_BASE() + s * CH_SIZE + addr);
@@ -340,7 +342,7 @@ private:
     return read(CH_BASE() + s * CH_SIZE + addr);
   }
   static inline uint8_t writeSn(SOCKET s, uint16_t addr, uint8_t data) {
-    #ifdef DEBUG_W5100_H
+    #ifdef DEBUG_W5100_H_WRITESN
     PRINTVAR_HEX(s);
     PRINTVAR_HEX(addr);
     PRINTVAR_HEX(CH_BASE() + s * CH_SIZE + addr);
@@ -348,7 +350,7 @@ private:
     return write(CH_BASE() + s * CH_SIZE + addr, data);
   }
   static inline uint16_t readSn(SOCKET s, uint16_t addr, uint8_t *buf, uint16_t len) {
-    #ifdef DEBUG_W5100_H
+    #ifdef DEBUG_W5100_H_READSN
     PRINTVAR_HEX(s);
     PRINTVAR_HEX(addr);
     PRINTVAR_HEX(CH_BASE() + s * CH_SIZE + addr);
@@ -356,7 +358,7 @@ private:
     return read(CH_BASE() + s * CH_SIZE + addr, buf, len);
   }
   static inline uint16_t writeSn(SOCKET s, uint16_t addr, uint8_t *buf, uint16_t len) {
-    #ifdef DEBUG_W5100_H
+    #ifdef DEBUG_W5100_H_WRITESN
     PRINTVAR_HEX(s);
     PRINTVAR_HEX(addr);
     PRINTVAR_HEX(CH_BASE() + s * CH_SIZE + addr);
@@ -367,7 +369,7 @@ private:
 #define __SOCKET_REGISTER8(name, address, adrss_w6100)       \
   static inline void write##name(SOCKET _s, uint8_t _data) { \
     if(chip == 61) {                                         \
-      writeSn(0, adrss_w6100 + W6100_SOCKET_NUM(_s), _data); \
+      writeSn(_s, adrss_w6100, _data); \
     } else {                                                 \
       writeSn(_s, address, _data);                           \
     }                                                        \
@@ -375,7 +377,7 @@ private:
   static inline uint8_t read##name(SOCKET _s) {              \
     if(chip == 61) {                                         \
       uint8_t data;                                          \
-      return readSn(0, adrss_w6100 + W6100_SOCKET_NUM(_s));  \
+      return readSn(_s, adrss_w6100);  \
     } else {                                                 \
       return readSn(_s, address);                            \
     }                                                        \
@@ -387,7 +389,7 @@ private:
     buf[0] = _data >> 8;                                     \
     buf[1] = _data & 0xFF;                                   \
     if(chip == 61) {                                         \
-      writeSn(0, adrss_w6100 + W6100_SOCKET_NUM(_s), buf, 2);\
+      writeSn(_s, adrss_w6100, buf, 2);\
     } else {                                                 \
       writeSn(_s, address, buf, 2);                          \
     }                                                        \
@@ -395,7 +397,7 @@ private:
   static uint16_t read##name(SOCKET _s) {                    \
     uint8_t buf[2];                                          \
     if(chip == 61) {                                         \
-      readSn(0, adrss_w6100 + W6100_SOCKET_NUM(_s), buf, 2); \
+      readSn(_s, adrss_w6100, buf, 2); \
     } else {                                                 \
       readSn(_s, address, buf, 2);                           \
     }                                                        \
@@ -405,14 +407,14 @@ private:
 #define __SOCKET_REGISTER_N(name, address, adrss_w6100, size)\
   static uint16_t write##name(SOCKET _s, uint8_t *_buff) {   \
     if(chip == 61) {                                         \
-      return writeSn(0, adrss_w6100 + W6100_SOCKET_NUM(_s), _buff, size);   \
+      return writeSn(_s, adrss_w6100, _buff, size);   \
     } else {                                                 \
       return writeSn(_s, address, _buff, size);              \
     }                                                        \
   }                                                          \
   static uint16_t read##name(SOCKET _s, uint8_t *_buff) {    \
     if(chip == 61) {                                         \
-      return readSn(0, adrss_w6100 + W6100_SOCKET_NUM(_s), _buff, size);    \
+      return readSn(_s, adrss_w6100, _buff, size);    \
     } else {                                                 \
       return readSn(_s, address, _buff, size);               \
     }                                                        \
