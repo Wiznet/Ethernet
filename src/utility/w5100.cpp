@@ -225,7 +225,7 @@ uint8_t W5100Class::init(void)
 	} else if (isW6100()) {
 		CH_BASE_MSB = 0x60;
 		CH_SIZE = 0x0400;	// W6100
-#if 0
+#if 1
 #ifdef ETHERNET_LARGE_BUFFERS
 #if MAX_SOCK_NUM <= 1
 		SSIZE = 16384;

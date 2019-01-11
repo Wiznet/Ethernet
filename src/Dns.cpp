@@ -46,6 +46,8 @@
 
 void DNSClient::begin(const IPAddress& aDNSServer)
 {
+	PRINTLINE();
+
 	iDNSServer = aDNSServer;
 	iRequestId = 0;
 }

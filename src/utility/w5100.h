@@ -196,6 +196,14 @@ uint8_t temp_new;
 #define W6100_SYSR_CHPL_LOCK	(1<<7)
 #define W6100_SYSR_CHPL_ULOCK	(0<<7)
 
+#define W6100_UDP_HEADER_IPV	(1<<7)
+#define W6100_UDP_HEADER_IPV4	(0<<7)
+#define W6100_UDP_HEADER_IPV6	(1<<7)
+#define W6100_UDP_HEADER_ALL	(1<<6)
+#define W6100_UDP_HEADER_MUL	(1<<5)
+#define W6100_UDP_HEADER_GUA	(0<<3)
+#define W6100_UDP_HEADER_LLA	(1<<3)
+
 #define __GP_REGISTER8(name, address, adrss_w6100)        \
   static inline void write##name(uint8_t _data) {   \
     if(chip == 61) {                                \
@@ -394,7 +402,7 @@ private:
     return (buf[0] << 8) | buf[1];                           \
   }
 
-#define __SOCKET_REGISTER_N(name, address, size, adrss_w6100)\
+#define __SOCKET_REGISTER_N(name, address, adrss_w6100, size)\
   static uint16_t write##name(SOCKET _s, uint8_t *_buff) {   \
     if(chip == 61) {                                         \
       return writeSn(0, adrss_w6100 + W6100_SOCKET_NUM(_s), _buff, size);   \
