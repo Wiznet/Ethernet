@@ -231,7 +231,6 @@ uint8_t W5100Class::init(void)
 	} else if (isW6100()) {
 		CH_BASE_MSB = 0x60;
 		CH_SIZE = 0x0400;	// W6100
-#if 1
 #ifdef ETHERNET_LARGE_BUFFERS
 #if MAX_SOCK_NUM <= 1
 		SSIZE = 16384;
@@ -251,7 +250,6 @@ uint8_t W5100Class::init(void)
 			writeSnRX_SIZE(i, 0);
 			writeSnTX_SIZE(i, 0);
 		}
-#endif
 #endif
 	// No hardware seems to be present.  Or it could be a W5200
 	// that's heard other SPI communication if its chip select
@@ -589,25 +587,22 @@ uint16_t W5100Class::write(uint16_t addr, const uint8_t *buf, uint16_t len)
 
 			cmd[0] = addr>>8;
 			cmd[1] = addr & 0xFF;
-			#if 1
 
 			#if defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 1
-			cmd[2] = 0x14;                       // 16K buffers
+			cmd[2] = 0;						// 16K buffers
 			#elif defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 2
-			cmd[2] = ((addr >> 8) & 0x20) | 0x14; // 8K buffers
+			cmd[2] = ((addr >> 8) & 0x20);	// 8K buffers
 			#elif defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 4
-			cmd[2] = ((addr >> 7) & 0x60) | 0x14; // 4K buffers
+			cmd[2] = ((addr >> 7) & 0x60);	// 4K buffers
 			#else
-			cmd[2] = ((addr >> 6) & 0xE0) | 0x14; // 2K buffers
+			cmd[2] = ((addr >> 6) & 0xE0);	// 2K buffers
 			#endif
 
-			#else
-			cmd[2] = W6100_SPI_FRAME_CTL_BSB_BLK((addr>>10)&0x7)
+			cmd[2] |= W6100_SPI_FRAME_CTL_BSB_BLK(0)
 					| W6100_SPI_FRAME_CTL_BSB_TXBF
 					| W6100_SPI_FRAME_CTL_WD
 					| W6100_SPI_FRAME_CTL_OPM_VDM
 					;
-			#endif
 
 			#if defined DEBUG_W5100_CPP_WRITE_TX
 			PRINTVAR_HEX(addr);
@@ -615,18 +610,7 @@ uint16_t W5100Class::write(uint16_t addr, const uint8_t *buf, uint16_t len)
 			PRINTVAR_HEX(cmd[1]);
 			PRINTVAR_HEX(cmd[2]);
 			#endif
-#if 0
-			Serial.println("tx");
-			#if defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 1
-			cmd[2] = 0x14;                       // 16K buffers
-			#elif defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 2
-			cmd[2] = ((addr >> 8) & 0x20) | 0x14; // 8K buffers
-			#elif defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 4
-			cmd[2] = ((addr >> 7) & 0x60) | 0x14; // 4K buffers
-			#else
-			cmd[2] = ((addr >> 6) & 0xE0) | 0x14; // 2K buffers
-			#endif
-#endif
+
 		} else {
 			// receive buffers
 
@@ -636,41 +620,30 @@ uint16_t W5100Class::write(uint16_t addr, const uint8_t *buf, uint16_t len)
 
 			cmd[0] = addr>>8;
 			cmd[1] = addr & 0xFF;
-			#if 1
+
 			#if defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 1
-			cmd[2] = 0x1C;                       // 16K buffers
+			cmd[2] = 0;						// 16K buffers
 			#elif defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 2
-			cmd[2] = ((addr >> 8) & 0x20) | 0x1C; // 8K buffers
+			cmd[2] = ((addr >> 8) & 0x20);	// 8K buffers
 			#elif defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 4
-			cmd[2] = ((addr >> 7) & 0x60) | 0x1C; // 4K buffers
+			cmd[2] = ((addr >> 7) & 0x60);	// 4K buffers
 			#else
-			cmd[2] = ((addr >> 6) & 0xE0) | 0x1C; // 2K buffers
+			cmd[2] = ((addr >> 6) & 0xE0);	// 2K buffers
 			#endif
-			#else
-			cmd[2] = W6100_SPI_FRAME_CTL_BSB_BLK((addr>>10)&0x7)
+
+			cmd[2] |= W6100_SPI_FRAME_CTL_BSB_BLK(0)
 					| W6100_SPI_FRAME_CTL_BSB_RXBF
 					| W6100_SPI_FRAME_CTL_WD
 					| W6100_SPI_FRAME_CTL_OPM_VDM
 					;
-			#endif
+
 			#if defined DEBUG_W5100_CPP_WRITE_RX
 			PRINTVAR_HEX(addr);
 			PRINTVAR_HEX(cmd[0]);
 			PRINTVAR_HEX(cmd[1]);
 			PRINTVAR_HEX(cmd[2]);
 			#endif
-#if 0
-			Serial.println("rx");
-			#if defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 1
-			cmd[2] = 0x1C;                       // 16K buffers
-			#elif defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 2
-			cmd[2] = ((addr >> 8) & 0x20) | 0x1C; // 8K buffers
-			#elif defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 4
-			cmd[2] = ((addr >> 7) & 0x60) | 0x1C; // 4K buffers
-			#else
-			cmd[2] = ((addr >> 6) & 0xE0) | 0x1C; // 2K buffers
-			#endif
-#endif
+
 		}
 		if (len <= 5) {
 			for (uint8_t i=0; i < len; i++) {
@@ -842,23 +815,22 @@ uint16_t W5100Class::read(uint16_t addr, uint8_t *buf, uint16_t len)
 
 			cmd[0] = addr>>8;
 			cmd[1] = addr & 0xFF;
-			#if 1
+			
 			#if defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 1
-			cmd[2] = 0x10;                       // 16K buffers
+			cmd[2] = 0;						// 16K buffers
 			#elif defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 2
-			cmd[2] = ((addr >> 8) & 0x20) | 0x10; // 8K buffers
+			cmd[2] = ((addr >> 8) & 0x20);	// 8K buffers
 			#elif defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 4
-			cmd[2] = ((addr >> 7) & 0x60) | 0x10; // 4K buffers
+			cmd[2] = ((addr >> 7) & 0x60);	// 4K buffers
 			#else
-			cmd[2] = ((addr >> 6) & 0xE0) | 0x10; // 2K buffers
+			cmd[2] = ((addr >> 6) & 0xE0);	// 2K buffers
 			#endif
-			#else
-			cmd[2] = W6100_SPI_FRAME_CTL_BSB_BLK((addr>>10)&0x7)
+			
+			cmd[2] |= W6100_SPI_FRAME_CTL_BSB_BLK(0)
 					| W6100_SPI_FRAME_CTL_BSB_TXBF
 					| W6100_SPI_FRAME_CTL_RD
 					| W6100_SPI_FRAME_CTL_OPM_VDM
 					;
-			#endif
 
 			#if defined DEBUG_W5100_CPP_READ_TX
 			PRINTVAR_HEX(addr);
@@ -866,17 +838,7 @@ uint16_t W5100Class::read(uint16_t addr, uint8_t *buf, uint16_t len)
 			PRINTVAR_HEX(cmd[1]);
 			PRINTVAR_HEX(cmd[2]);
 			#endif
-#if 0
-			#if defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 1
-			cmd[2] = 0x14;                       // 16K buffers
-			#elif defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 2
-			cmd[2] = ((addr >> 8) & 0x20) | 0x14; // 8K buffers
-			#elif defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 4
-			cmd[2] = ((addr >> 7) & 0x60) | 0x14; // 4K buffers
-			#else
-			cmd[2] = ((addr >> 6) & 0xE0) | 0x14; // 2K buffers
-			#endif
-#endif
+
 		} else {
 			// receive buffers
 
@@ -886,40 +848,30 @@ uint16_t W5100Class::read(uint16_t addr, uint8_t *buf, uint16_t len)
 
 			cmd[0] = addr>>8;
 			cmd[1] = addr & 0xFF;
-			#if 1
+
 			#if defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 1
-			cmd[2] = 0x18;                       // 16K buffers
+			cmd[2] = 0;						// 16K buffers
 			#elif defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 2
-			cmd[2] = ((addr >> 8) & 0x20) | 0x18; // 8K buffers
+			cmd[2] = ((addr >> 8) & 0x20);	// 8K buffers
 			#elif defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 4
-			cmd[2] = ((addr >> 7) & 0x60) | 0x18; // 4K buffers
+			cmd[2] = ((addr >> 7) & 0x60);	// 4K buffers
 			#else
-			cmd[2] = ((addr >> 6) & 0xE0) | 0x18; // 2K buffers
+			cmd[2] = ((addr >> 6) & 0xE0);	// 2K buffers
 			#endif
-			#else
-			cmd[2] = W6100_SPI_FRAME_CTL_BSB_BLK((addr>>10)&0x7)
+
+			cmd[2] |= W6100_SPI_FRAME_CTL_BSB_BLK(0)
 					| W6100_SPI_FRAME_CTL_BSB_RXBF
 					| W6100_SPI_FRAME_CTL_RD
 					| W6100_SPI_FRAME_CTL_OPM_VDM
 					;
-			#endif
+
 			#if defined DEBUG_W5100_CPP_READ_RX
 			PRINTVAR_HEX(addr);
 			PRINTVAR_HEX(cmd[0]);
 			PRINTVAR_HEX(cmd[1]);
 			PRINTVAR_HEX(cmd[2]);
 			#endif
-#if 0
-			#if defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 1
-			cmd[2] = 0x1C;                       // 16K buffers
-			#elif defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 2
-			cmd[2] = ((addr >> 8) & 0x20) | 0x1C; // 8K buffers
-			#elif defined(ETHERNET_LARGE_BUFFERS) && MAX_SOCK_NUM <= 4
-			cmd[2] = ((addr >> 7) & 0x60) | 0x1C; // 4K buffers
-			#else
-			cmd[2] = ((addr >> 6) & 0xE0) | 0x1C; // 2K buffers
-			#endif
-#endif
+			
 		}
 		SPI.transfer(cmd, 3);
 		memset(buf, 0, len);
