@@ -33,7 +33,6 @@ IPAddress myDns(192, 168, 0, 1);
 IPAddress gateway(192, 168, 0, 1);
 IPAddress subnet(255, 255, 0, 0);
 #else
-// Original
 byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 IPAddress ip(192, 168, 1, 177);
@@ -55,16 +54,6 @@ void setup() {
   //Ethernet.init(15);  // ESP8266 with Adafruit Featherwing Ethernet
   //Ethernet.init(33);  // ESP32 with Adafruit Featherwing Ethernet
 
-#if defined DEBUG_CHATSERVER_INO_ETHERNET_BEGIN
-  // Open serial communications and wait for port to open:
-  Serial.begin(9600);
-   while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
-
-  // initialize the ethernet device
-  Ethernet.begin(mac, ip, myDns, gateway, subnet);
-#else
   // initialize the ethernet device
   Ethernet.begin(mac, ip, myDns, gateway, subnet);
 
@@ -73,7 +62,6 @@ void setup() {
    while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
-#endif
 
   // Check for Ethernet hardware present
   if (Ethernet.hardwareStatus() == EthernetNoHardware) {

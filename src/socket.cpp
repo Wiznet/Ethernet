@@ -27,6 +27,7 @@
 //#define DEBUG_SOCKET_CPP_SOCKETRECV
 //#define DEBUG_SOCKET_CPP_SOCKETSENDUDP
 //#define DEBUG_ETHERNET_UDP_CPP_SOCKETSTARTUDP
+//#define DEBUG_SOCKET_CPP_BEGINE
 
 #if ARDUINO >= 156 && !defined(ARDUINO_ARCH_PIC32)
 extern void yield(void);
@@ -82,8 +83,8 @@ uint8_t EthernetClass::socketBegin(uint8_t protocol, uint16_t port)
 	for (s=0; s < maxindex; s++) {
 		status[s] = W5100.readSnSR(s);
 
-		#if defined DEBUG_SOCKET_CPP
-		//PRINTVAR_HEX(status[s]);
+		#if defined DEBUG_SOCKET_CPP_BEGINE
+		PRINTVAR_HEX(status[s]);
 		#endif
 
 		if (status[s] == SnSR::CLOSED) goto makesocket;
@@ -235,11 +236,6 @@ uint8_t EthernetClass::socketListen(uint8_t s)
 		SPI.endTransaction();
 		return 0;
 	}
-
-	#if defined DEBUG_SOCKET_CPP_SOCKETLISTEN
-	PRINTSTR("socketListen");
-	#endif
-
 	W5100.execCmdSn(s, Sock_LISTEN);
 	SPI.endTransaction();
 	return 1;

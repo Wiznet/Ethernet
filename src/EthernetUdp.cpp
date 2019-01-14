@@ -35,13 +35,27 @@
 //#define DEBUG_ETHERNET_UDP_READ
 //#define DEBUG_ETHERNETUDP_CPP_WRITE
 //#define DEBUG_ETHERNET_UDP_CPP_BEGINPACKET
+//#define DEBUG_ETHERNET_UDP_CPP_BEGIN
 
 /* Start EthernetUDP socket, listening at local port PORT */
 uint8_t EthernetUDP::begin(uint16_t port)
 {
+	#if defined DEBUG_ETHERNET_UDP_CPP_BEGIN
+	PRINTLINE();
+	#endif
 	if (sockindex < MAX_SOCK_NUM) Ethernet.socketClose(sockindex);
+	#if defined DEBUG_ETHERNET_UDP_CPP_BEGIN
+	PRINTLINE();
+	#endif
+
 	sockindex = Ethernet.socketBegin(SnMR::UDP, port);
-	if (sockindex >= MAX_SOCK_NUM) return 0;
+	#if defined DEBUG_ETHERNET_UDP_CPP_BEGIN
+	PRINTLINE();
+	PRINTVAR(sockindex);
+	#endif
+
+	
+	if (sockindex >= MAX_SOCK_NUM)	return 0;
 	_port = port;
 	_remaining = 0;
 	return 1;
@@ -73,6 +87,10 @@ int EthernetUDP::beginPacket(const char *host, uint16_t port)
 	int ret = 0;
 	DNSClient dns;
 	IPAddress remote_addr;
+
+	#if defined DEBUG_ETHERNET_UDP_CPP_BEGINPACKET
+	PRINTVAR_HEX(Ethernet.dnsServerIP());
+	#endif
 
 	dns.begin(Ethernet.dnsServerIP());
 
@@ -136,18 +154,11 @@ size_t EthernetUDP::write(const uint8_t *buffer, size_t size)
 int EthernetUDP::parsePacket()
 {
 	// discard any remaining bytes in the last packet
-
 	while (_remaining) {
 		// could this fail (loop endlessly) if _remaining > 0 and recv in read fails?
 		// should only occur if recv fails after telling us the data is there, lets
 		// hope the w5100 always behaves :)
 		read((uint8_t *)NULL, _remaining);
-
-		int temp = 10;
-		while(temp--)
-		{
-			delay(1000);
-		}
 	}
 
 	if (Ethernet.socketRecvAvailable(sockindex) > 0) {
@@ -349,7 +360,6 @@ int EthernetUDP::read(unsigned char *buffer, size_t len)
 			return got;
 		}
 	}
-
 	// If we get here, there's no data available or recv failed
 	return -1;
 }

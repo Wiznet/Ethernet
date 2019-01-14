@@ -35,7 +35,6 @@ int EthernetClass::begin(uint8_t *mac, unsigned long timeout, unsigned long resp
 
 	// Initialise the basic info
 	if (W5100.init() == 0) return 0;
-
 	SPI.beginTransaction(SPI_ETHERNET_SETTINGS);
 
 	#if defined DEBUG_ETHERNET_CPP_BEGIN
@@ -127,7 +126,6 @@ void EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress g
 	W5100.setIPAddress(ip._address.bytes);
 	W5100.setGatewayIp(gateway._address.bytes);
 	W5100.setSubnetMask(subnet._address.bytes);
-
 #else
 	W5100.setIPAddress(ip._address);
 	W5100.setGatewayIp(gateway._address);

@@ -52,8 +52,6 @@
 #define SPI_ETHERNET_SETTINGS SPISettings(8000000, MSBFIRST, SPI_MODE0)
 #endif
 
-#define USE_W6100
-#define USE_W6100_DEBUG
 
 typedef uint8_t SOCKET;
 
@@ -167,10 +165,7 @@ public:
     return data;
   }
 
-uint8_t temp_old;
-uint8_t temp_new;
-
-#define W6100_SPI_FRAME_CTL_BSB_BLK(sn)	(sn<<5)
+#define W6100_SPI_FRAME_CTL_BSB_BLK(sn)	((sn)<<5)
 
 #define W6100_SPI_FRAME_CTL_BSB_COMM	(0<<3)
 #define W6100_SPI_FRAME_CTL_BSB_SOCK	(1<<3)
@@ -189,7 +184,7 @@ uint8_t temp_new;
 #define W6100_SOCKET_BASE_ADDR	(0x6000)
 #define W6100_TX_BASE_ADDR	    (0x8000)
 #define W6100_RX_BASE_ADDR	    (0xC000)
-#define W6100_SOCKET_NUM(_s)    (_s<<10)
+#define W6100_SOCKET_NUM(_s)    ((_s)<<10))
 
 #define W6100_CHPLCKR_UNLOCK	0xCE
 #define W6100_NETLCKR_UNLOCK	0x3A
@@ -314,7 +309,6 @@ public:
 #undef __GP_REGISTER8
 #undef __GP_REGISTER16
 #undef __GP_REGISTER_N
-#undef __GP_REGISTER8_V6
 
   // W5100 Socket registers
   // ----------------------
@@ -420,8 +414,6 @@ private:
     }                                                        \
   }
 
-
-
 public:
   __SOCKET_REGISTER8(SnMR,        0x0000, 0x0000)        // Mode
   __SOCKET_REGISTER8(SnCR,        0x0001, 0x0010)        // Command
@@ -447,7 +439,6 @@ public:
 #undef __SOCKET_REGISTER8
 #undef __SOCKET_REGISTER16
 #undef __SOCKET_REGISTER_N
-#undef __SOCKET_REGISTER8_V6
 
 
 private:
