@@ -25,8 +25,9 @@
 
 int EthernetClient::connect(const char * host, uint16_t port)
 {
+	PRINTLINE();
 	DNSClient dns; // Look up the host first
-	IPAddress remote_addr;
+	IP6Address remote_addr;
 
 	if (sockindex < MAX_SOCK_NUM) {
 		if (Ethernet.socketStatus(sockindex) != SnSR::CLOSED) {
@@ -39,8 +40,9 @@ int EthernetClient::connect(const char * host, uint16_t port)
 	return connect(remote_addr, port);
 }
 
-int EthernetClient::connect(IPAddress ip, uint16_t port)
+int EthernetClient::connect(IP6Address ip, uint16_t port)
 {
+	PRINTLINE();
 	if (sockindex < MAX_SOCK_NUM) {
 		if (Ethernet.socketStatus(sockindex) != SnSR::CLOSED) {
 			Ethernet.socketDisconnect(sockindex); // TODO: should we call stop()?
@@ -48,11 +50,11 @@ int EthernetClient::connect(IPAddress ip, uint16_t port)
 		sockindex = MAX_SOCK_NUM;
 	}
 #if defined(ESP8266) || defined(ESP32)
-	if (ip == IPAddress((uint32_t)0) || ip == IPAddress(0xFFFFFFFFul)) return 0;
+	if (ip == IP6Address((uint32_t)0) || ip == IP6Address(0xFFFFFFFFul)) return 0;
 #else
-	if (ip == IPAddress(0ul) || ip == IPAddress(0xFFFFFFFFul)) return 0;
+	if (ip == IP6Address(0ul) || ip == IP6Address(0xFFFFFFFFul)) return 0;
 #endif
-	sockindex = Ethernet.socketBegin(SnMR::TCP, 0);
+	sockindex = Ethernet.socketBegin(SnMR::TCP6, 0);
 	if (sockindex >= MAX_SOCK_NUM) return 0;
 	Ethernet.socketConnect(sockindex, rawIPAddress(ip), port);
 	uint32_t start = millis();
@@ -190,14 +192,36 @@ uint16_t EthernetClient::localPort()
 
 // https://github.com/per1234/EthernetMod
 // returns the remote IP address: http://forum.arduino.cc/index.php?topic=82416.0
-IPAddress EthernetClient::remoteIP()
+IP6Address EthernetClient::remoteIP()
 {
-	if (sockindex >= MAX_SOCK_NUM) return IPAddress((uint32_t)0);
-	uint8_t remoteIParray[4];
+	if (sockindex >= MAX_SOCK_NUM) return IP6Address((uint32_t)0);
+	uint8_t remoteIParray[16];
 	SPI.beginTransaction(SPI_ETHERNET_SETTINGS);
-	W5100.readSnDIPR(sockindex, remoteIParray);
+
+	if(W5100.readSnMR(sockindex) == W6100_SnMR_TCPD) {
+
+		// TCP DUAL
+		if((W5100.readSnESR(sockindex) & W6100_SnESR_TCP6) == W6100_SnESR_TCP6)	{
+			W5100.readSnDIP6R(sockindex, remoteIParray);
+		} else {
+			W5100.readSnDIPR(sockindex, remoteIParray);
+			memset(&remoteIParray[4], 0, 16-4);
+		}
+
+	} else if(W5100.readSnMR(sockindex) == W6100_SnMR_TCP4) {
+
+		// TCP IPv4
+		W5100.readSnDIPR(sockindex, remoteIParray);
+		memset(&remoteIParray[4], 0, 16-4);
+
+	} else {
+		
+		// TCP IPv6
+		W5100.readSnDIP6R(sockindex, remoteIParray);
+	}
+
 	SPI.endTransaction();
-	return IPAddress(remoteIParray);
+	return IP6Address(remoteIParray);
 }
 
 // https://github.com/per1234/EthernetMod
@@ -212,4 +236,36 @@ uint16_t EthernetClient::remotePort()
 	return port;
 }
 
+uint8_t EthernetClient::IPVis()
+{
+	uint8_t ipv;
+
+	if (sockindex >= MAX_SOCK_NUM) return IP6Address((uint32_t)0);
+	SPI.beginTransaction(SPI_ETHERNET_SETTINGS);
+
+	if(W5100.readSnMR(sockindex) == W6100_SnMR_TCPD) {
+
+		// TCP DUAL
+		if((W5100.readSnESR(sockindex) & W6100_SnESR_TCP6) == W6100_SnESR_TCP6)	{
+			// IPv6
+			ipv = 6;
+		} else {
+			// IPv4
+			ipv = 4;
+		}
+
+	} else if(W5100.readSnMR(sockindex) == W6100_SnMR_TCP4) {
+
+		// TCP IPv4
+		ipv = 4;
+
+	} else {
+		
+		// TCP IPv6
+		ipv = 6;
+	}
+
+	SPI.endTransaction();
+	return ipv;
+}
 

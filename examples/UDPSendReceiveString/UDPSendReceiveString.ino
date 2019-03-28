@@ -19,9 +19,52 @@
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network:
 byte mac[] = {
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
+0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+
+byte ip6_lla[] = {
+0xfe,0x80, 0x00,0x00,
+0x00,0x00, 0x00,0x00,
+0x02,0x00, 0xdc,0xff,
+0xfe,0x57, 0x57,0x61
 };
-IPAddress ip(192, 168, 1, 177);
+
+byte ip6_gua[] = {
+0x20,0x01,0x02,0xb8,
+0x00,0x10,0xFF,0xFE,
+0x00,0x00,0xdc,0xff,
+0xfe,0x57,0x57,0x61
+};
+
+byte ip6_sn6[] = {
+0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,
+0x00,0x00,0x00, 0x00,
+0x00,0x00,0x00,0x00
+};
+
+byte ip6_gw6[] = {
+0xfe, 0x80, 0x00,0x00,
+0x00,0x00,0x00,0x00,
+0x02,0x00, 0x87,0xff,
+0xfe,0x08, 0x4c,0x81
+};
+
+byte server_gua[] = {
+0x20,0x01,0x02,0xb8,
+0x00,0x10,0xFF,0xFE,
+0x11,0x8b,0x4d,0x1c,
+0x05,0x15,0x49,0x1a
+};
+
+IP6Address ip(192, 168, 0, 4);
+IP6Address myDns(192, 168, 0, 1);
+IP6Address gateway(192, 168, 0, 1);
+IP6Address subnet(255, 255, 0, 0);
+
+IP6Address lla(ip6_lla, 16);
+IP6Address gua(ip6_gua, 16);
+IP6Address sn6(ip6_sn6, 16);
+IP6Address gw6(ip6_gw6, 16);
 
 unsigned int localPort = 8888;      // local port to listen on
 
@@ -42,7 +85,11 @@ void setup() {
   //Ethernet.init(33);  // ESP32 with Adafruit Featherwing Ethernet
 
   // start the Ethernet
-  Ethernet.begin(mac, ip);
+  #if 1
+  Ethernet.begin(mac);
+  #else
+  Ethernet.begin(mac, ip, myDns, gateway, subnet, lla, gua, sn6, gw6);
+  #endif
 
   // Open serial communications and wait for port to open:
   Serial.begin(9600);
@@ -63,6 +110,17 @@ void setup() {
 
   // start UDP
   Udp.begin(localPort);
+  
+  Serial.println("UDPSendReceiveString address:");
+
+  Serial.print("My IPv4 address: ");
+  Serial.println(Ethernet.localIP());
+
+  Serial.print("My IPv6 LLA: ");
+  Serial.println(Ethernet.linklocalAddress());
+  
+  Serial.print("My IPv6 GUA: ");
+  Serial.println(Ethernet.globalunicastAddress());
 }
 
 void loop() {
@@ -72,13 +130,8 @@ void loop() {
     Serial.print("Received packet of size ");
     Serial.println(packetSize);
     Serial.print("From ");
-    IPAddress remote = Udp.remoteIP();
-    for (int i=0; i < 4; i++) {
-      Serial.print(remote[i], DEC);
-      if (i < 3) {
-        Serial.print(".");
-      }
-    }
+    IP6Address remote = Udp.remoteIP();
+    Serial.print(remote);
     Serial.print(", port ");
     Serial.println(Udp.remotePort());
 

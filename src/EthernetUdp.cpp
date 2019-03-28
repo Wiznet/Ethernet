@@ -34,9 +34,32 @@
 /* Start EthernetUDP socket, listening at local port PORT */
 uint8_t EthernetUDP::begin(uint16_t port)
 {
+	#if 0
+	PRINTVAR(port);
+	#endif
+
 	if (sockindex < MAX_SOCK_NUM) Ethernet.socketClose(sockindex);
-	sockindex = Ethernet.socketBegin(SnMR::UDP, port);
+	sockindex = Ethernet.socketBegin(SnMR::UDP6, port);
 	if (sockindex >= MAX_SOCK_NUM) return 0;
+	_port = port;
+	_remaining = 0;
+	return 1;
+}
+
+uint8_t EthernetUDP::begin(uint16_t port, uint8_t ipv4)
+{
+	if(ipv4 == 1)
+	{
+		#if 0
+		PRINTSTR(IPv4);
+		#endif
+	}
+	if (sockindex < MAX_SOCK_NUM) Ethernet.socketClose(sockindex);
+	PRINTLINE();
+	sockindex = Ethernet.socketBegin(SnMR::UDP, port);
+	PRINTLINE();
+	if (sockindex >= MAX_SOCK_NUM) return 0;
+	PRINTLINE();
 	_port = port;
 	_remaining = 0;
 	return 1;
@@ -63,7 +86,7 @@ int EthernetUDP::beginPacket(const char *host, uint16_t port)
 	// Look up the host first
 	int ret = 0;
 	DNSClient dns;
-	IPAddress remote_addr;
+	IP6Address remote_addr;
 
 	dns.begin(Ethernet.dnsServerIP());
 	ret = dns.getHostByName(host, remote_addr);
@@ -71,7 +94,7 @@ int EthernetUDP::beginPacket(const char *host, uint16_t port)
 	return beginPacket(remote_addr, port);
 }
 
-int EthernetUDP::beginPacket(IPAddress ip, uint16_t port)
+int EthernetUDP::beginPacket(IP6Address ip, uint16_t port)
 {
 	_offset = 0;
 	//Serial.printf("UDP beginPacket\n");
@@ -215,10 +238,10 @@ void EthernetUDP::flush()
 }
 
 /* Start EthernetUDP socket, listening at local port PORT */
-uint8_t EthernetUDP::beginMulticast(IPAddress ip, uint16_t port)
+uint8_t EthernetUDP::beginMulticast(IP6Address ip, uint16_t port)
 {
 	if (sockindex < MAX_SOCK_NUM) Ethernet.socketClose(sockindex);
-	sockindex = Ethernet.socketBeginMulticast(SnMR::UDP | SnMR::MULTI, ip, port);
+	sockindex = Ethernet.socketBeginMulticast(SnMR::UDP6 | SnMR::MULTI, ip, port);
 	if (sockindex >= MAX_SOCK_NUM) return 0;
 	_port = port;
 	_remaining = 0;

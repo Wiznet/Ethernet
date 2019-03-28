@@ -16,19 +16,79 @@
 
 #include <SPI.h>
 #include <Ethernet.h>
+#include "IP6Address.h"
 
 // Enter a MAC address for your controller below.
 // Newer Ethernet shields have a MAC address printed on a sticker on the shield
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
+byte ip6_lla[] = {
+0xfe,0x80, 0x00,0x00,
+0x00,0x00, 0x00,0x00,
+0x02,0x00, 0xdc,0xff,
+0xfe,0x57, 0x57,0x61
+};
+
+byte ip6_gua[] = {
+0x20,0x01,0x02,0xb8,
+0x00,0x10,0xFF,0xFE,
+0x00,0x00,0xdc,0xff,
+0xfe,0x57,0x57,0x61
+};
+
+byte ip6_sn6[] = {
+0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,
+0x00,0x00,0x00, 0x00,
+0x00,0x00,0x00,0x00
+};
+
+byte ip6_gw6[] = {
+0xfe, 0x80, 0x00,0x00,
+0x00,0x00,0x00,0x00,
+0x02,0x00, 0x87,0xff,
+0xfe,0x08, 0x4c,0x81
+};
+
+byte ip6_dns6[] = {
+0x20, 0x01, 0x48, 0x60,
+0x48, 0x60, 0x00, 0x00,
+0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x88, 0x88
+};
+
+byte ip6_google[] = {
+0x24, 0x04, 0x68, 0x00,
+0x40, 0x04, 0x08, 0x07,
+0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x20, 0x04,
+};
+
+byte ip6_yahoo[] = {
+0x20, 0x01, 0x49, 0x98,
+0x00, 0x0C, 0x10, 0x23,
+0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x00, 0x04,
+};
+
+IP6Address webaddress(ip6_yahoo, 16);
+
 // if you don't want to use DNS (and reduce your sketch size)
 // use the numeric IP instead of the name for the server:
 //IPAddress server(74,125,232,128);  // numeric IP for Google (no DNS)
-char server[] = "www.google.com";    // name address for Google (using DNS)
+//char server[] = "www.google.com";    // name address for Google (using DNS)
 
 // Set the static IP address to use if the DHCP fails to assign
-IPAddress ip(192, 168, 0, 177);
-IPAddress myDns(192, 168, 0, 1);
+IP6Address ip(192, 168, 0, 4);
+IP6Address myDns(192, 168, 0, 1);
+IP6Address gateway(192, 168, 0, 1);
+IP6Address subnet(255, 255, 0, 0);
+
+IP6Address lla(ip6_lla, 16);
+IP6Address gua(ip6_gua, 16);
+IP6Address sn6(ip6_sn6, 16);
+IP6Address gw6(ip6_gw6, 16);
+IP6Address dns6(ip6_dns6, 16);
 
 // Initialize the Ethernet client library
 // with the IP address and port of the server
@@ -70,19 +130,36 @@ void setup() {
       Serial.println("Ethernet cable is not connected.");
     }
     // try to congifure using IP address instead of DHCP:
-    Ethernet.begin(mac, ip, myDns);
+    Ethernet.begin(mac, ip, myDns, gateway, subnet, lla, gua, sn6, gw6);
   } else {
-    Serial.print("  DHCP assigned IP ");
+    Serial.println("  DHCP assigned IP ");
+    
+    Serial.print("My IPv4 address: ");
     Serial.println(Ethernet.localIP());
+
+    Serial.print("My IPv6 LLA: ");
+    Serial.println(Ethernet.linklocalAddress());
+    
+    Serial.print("My IPv6 GUA: ");
+    Serial.println(Ethernet.globalunicastAddress());
   }
+
   // give the Ethernet shield a second to initialize:
   delay(1000);
   Serial.print("connecting to ");
+#if 1
+  Serial.println(webaddress);
+#else
   Serial.print(server);
+#endif
   Serial.println("...");
 
   // if you get a connection, report back via serial:
+#if 1
+  if (client.connect(webaddress, 80)) {
+#else
   if (client.connect(server, 80)) {
+#endif
     Serial.print("connected to ");
     Serial.println(client.remoteIP());
     // Make a HTTP request:

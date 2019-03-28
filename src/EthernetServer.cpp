@@ -25,9 +25,26 @@
 uint16_t EthernetServer::server_port[MAX_SOCK_NUM];
 
 
+void EthernetServer::begin(uint8_t ipv6)
+{
+	if(ipv6 == 1)
+	{
+		PRINTSTR("IPv4, IPv6 Dual Begin");
+	}
+
+	uint8_t sockindex = Ethernet.socketBegin(SnMR::TCPD, _port);
+	if (sockindex < MAX_SOCK_NUM) {
+		if (Ethernet.socketListen(sockindex)) {
+			server_port[sockindex] = _port;
+		} else {
+			Ethernet.socketDisconnect(sockindex);
+		}
+	}
+}
+
 void EthernetServer::begin()
 {
-	uint8_t sockindex = Ethernet.socketBegin(SnMR::TCP, _port);
+	uint8_t sockindex = Ethernet.socketBegin(SnMR::TCP6, _port);
 	if (sockindex < MAX_SOCK_NUM) {
 		if (Ethernet.socketListen(sockindex)) {
 			server_port[sockindex] = _port;
@@ -68,7 +85,13 @@ EthernetClient EthernetServer::available()
 			}
 		}
 	}
+	#if 1
+	// IPv4 IPv6
+	if (!listening) begin(1);
+	#else
+	// IPv6
 	if (!listening) begin();
+	#endif
 	return EthernetClient(sockindex);
 }
 
@@ -100,7 +123,16 @@ EthernetClient EthernetServer::accept()
 			}
 		}
 	}
+
+#if 0
+	// IPv6
 	if (!listening) begin();
+
+#else
+	// IPv4 IPv6 Dual
+
+	if (!listening) begin(1);
+#endif
 	return EthernetClient(sockindex);
 }
 

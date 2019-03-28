@@ -39,6 +39,17 @@ byte packetBuffer[NTP_PACKET_SIZE]; //buffer to hold incoming and outgoing packe
 // A UDP instance to let us send and receive packets over UDP
 EthernetUDP Udp;
 
+// ntp.rhrk.uni-kl.de
+// 2001:638:208:1::116
+byte ip6_ntp[] = {
+0x20, 0x01, 0x06, 0x38,
+0x02, 0x08, 0x00, 0x01,
+0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x01, 0x16
+};
+
+IP6Address ntp(ip6_ntp, 16);
+
 void setup() {
   // You can use Ethernet.init(pin) to configure the CS pin
   //Ethernet.init(10);  // Most Arduino shields
@@ -68,11 +79,25 @@ void setup() {
       delay(1);
     }
   }
+  // print your local IP address:
+  Serial.print("My IPv4 address: ");
+  Serial.println(Ethernet.localIP());
+
+  Serial.print("My IPv6 LLA: ");
+  Serial.println(Ethernet.linklocalAddress());
+  
+  Serial.print("My IPv6 GUA: ");
+  Serial.println(Ethernet.globalunicastAddress());
+
   Udp.begin(localPort);
 }
 
 void loop() {
+  #if 1
+  sendNTPpacket(ntp); // send an NTP packet to a time server
+  #else
   sendNTPpacket(timeServer); // send an NTP packet to a time server
+  #endif
 
   // wait to see if a reply is available
   delay(1000);
@@ -123,7 +148,11 @@ void loop() {
 }
 
 // send an NTP request to the time server at the given address
+#if 1
+void sendNTPpacket(IP6Address address) {
+#else
 void sendNTPpacket(const char * address) {
+#endif
   // set all bytes in the buffer to 0
   memset(packetBuffer, 0, NTP_PACKET_SIZE);
   // Initialize values needed to form NTP request

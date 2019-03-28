@@ -25,10 +25,24 @@
 byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
 };
-IPAddress ip(192, 168, 1, 177);
+IP6Address ip(192, 168, 0, 4);
 
 // Enter the IP address of the server you're connecting to:
-IPAddress server(1, 1, 1, 1);
+byte ip6_server[] = {
+#if 1
+0x20, 0x01, 0x02, 0xB8,
+0x00, 0x10, 0xFF, 0xFF,
+0x11, 0x8B, 0x4D, 0x1C,
+0x05, 0x15, 0x49, 0x1A
+#else
+0x26, 0x06, 0x47, 0x00,
+0x47, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x11, 0x11
+#endif
+};
+
+IP6Address server(ip6_server, 16);
 
 // Initialize the Ethernet client library
 // with the IP address and port of the server
@@ -45,14 +59,14 @@ void setup() {
   //Ethernet.init(15);  // ESP8266 with Adafruit Featherwing Ethernet
   //Ethernet.init(33);  // ESP32 with Adafruit Featherwing Ethernet
 
-  // start the Ethernet connection:
-  Ethernet.begin(mac, ip);
-
   // Open serial communications and wait for port to open:
   Serial.begin(9600);
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
+
+  // start the Ethernet connection:
+  Ethernet.begin(mac);
 
   // Check for Ethernet hardware present
   if (Ethernet.hardwareStatus() == EthernetNoHardware) {
@@ -66,12 +80,21 @@ void setup() {
     delay(500);
   }
 
+  Serial.print("My IPv4 address: ");
+  Serial.println(Ethernet.localIP());
+
+  Serial.print("My IPv6 LLA: ");
+  Serial.println(Ethernet.linklocalAddress());
+  
+  Serial.print("My IPv6 GUA: ");
+  Serial.println(Ethernet.globalunicastAddress());
+
   // give the Ethernet shield a second to initialize:
   delay(1000);
   Serial.println("connecting...");
 
   // if you get a connection, report back via serial:
-  if (client.connect(server, 10002)) {
+  if (client.connect(server, 23)) {
     Serial.println("connected");
   } else {
     // if you didn't get a connection to the server:

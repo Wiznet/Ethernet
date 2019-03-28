@@ -25,6 +25,11 @@ byte mac[] = {
   0x00, 0xAA, 0xBB, 0xCC, 0xDE, 0x02
 };
 
+IP6Address ip(192, 168, 0, 4);
+IP6Address myDns(192, 168, 0, 1);
+IP6Address gateway(192, 168, 0, 1);
+IP6Address subnet(255, 255, 0, 0);
+
 void setup() {
   // You can use Ethernet.init(pin) to configure the CS pin
   //Ethernet.init(10);  // Most Arduino shields
@@ -43,6 +48,7 @@ void setup() {
   // start the Ethernet connection:
   Serial.println("Initialize Ethernet with DHCP:");
   if (Ethernet.begin(mac) == 0) {
+    Serial.println("AddressAutoConfig Failed");
     Serial.println("Failed to configure Ethernet using DHCP");
     if (Ethernet.hardwareStatus() == EthernetNoHardware) {
       Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
@@ -55,8 +61,14 @@ void setup() {
     }
   }
   // print your local IP address:
-  Serial.print("My IP address: ");
+  Serial.print("My IPv4 address: ");
   Serial.println(Ethernet.localIP());
+
+  Serial.print("My IPv6 LLA: ");
+  Serial.println(Ethernet.linklocalAddress());
+  
+  Serial.print("My IPv6 GUA: ");
+  Serial.println(Ethernet.globalunicastAddress());
 }
 
 void loop() {
@@ -70,7 +82,14 @@ void loop() {
       //renewed success
       Serial.println("Renewed success");
       //print your local IP address:
-      Serial.print("My IP address: ");
+      Serial.println("My IP address: ");
+      Serial.print("LLA:");
+      Serial.println(Ethernet.linklocalAddress());
+      
+      Serial.print("GUA:");
+      Serial.println(Ethernet.globalunicastAddress());
+
+      Serial.print("IPv4:");
       Serial.println(Ethernet.localIP());
       break;
 
@@ -83,7 +102,14 @@ void loop() {
       //rebind success
       Serial.println("Rebind success");
       //print your local IP address:
-      Serial.print("My IP address: ");
+      Serial.println("My IP address: ");
+      Serial.print("LLA:");
+      Serial.println(Ethernet.linklocalAddress());
+      
+      Serial.print("GUA:");
+      Serial.println(Ethernet.globalunicastAddress());
+
+      Serial.print("IPv4:");
       Serial.println(Ethernet.localIP());
       break;
 

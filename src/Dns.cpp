@@ -44,14 +44,14 @@
 #define TRUNCATED        -3
 #define INVALID_RESPONSE -4
 
-void DNSClient::begin(const IPAddress& aDNSServer)
+void DNSClient::begin(const IP6Address& aDNSServer)
 {
 	iDNSServer = aDNSServer;
 	iRequestId = 0;
 }
 
 
-int DNSClient::inet_aton(const char* address, IPAddress& result)
+int DNSClient::inet_aton(const char* address, IP6Address& result)
 {
 	uint16_t acc = 0; // Accumulator
 	uint8_t dots = 0;
@@ -85,7 +85,7 @@ int DNSClient::inet_aton(const char* address, IPAddress& result)
 	return 1;
 }
 
-int DNSClient::getHostByName(const char* aHostname, IPAddress& aResult, uint16_t timeout)
+int DNSClient::getHostByName(const char* aHostname, IP6Address& aResult, uint16_t timeout)
 {
 	int ret = 0;
 
@@ -211,7 +211,7 @@ uint16_t DNSClient::BuildRequest(const char* aName)
 }
 
 
-uint16_t DNSClient::ProcessResponse(uint16_t aTimeout, IPAddress& aAddress)
+uint16_t DNSClient::ProcessResponse(uint16_t aTimeout, IP6Address& aAddress)
 {
 	uint32_t startTime = millis();
 
