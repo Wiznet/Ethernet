@@ -124,6 +124,27 @@ int EthernetClass::begin(uint8_t *mac, unsigned long timeout, unsigned long resp
 
 }
 
+int EthernetClass::begin(uint8_t *mac, IP6Address ip, IP6Address dns, IP6Address gateway, IP6Address subnet, unsigned long timeout, unsigned long responseTimeout)
+{
+	begin(mac);
+
+	SPI.beginTransaction(SPI_ETHERNET_SETTINGS);
+	
+#if ARDUINO > 106 || TEENSYDUINO > 121
+
+	W5100.setIPAddress(ip._address.bytes);
+	W5100.setGatewayIp(gateway._address.bytes);
+	W5100.setSubnetMask(subnet._address.bytes);
+#else
+
+	W5100.setIPAddress(ip._address);
+	W5100.setGatewayIp(gateway._address);
+	W5100.setSubnetMask(subnet._address);
+#endif
+
+	SPI.endTransaction();
+}
+
 void EthernetClass::begin(uint8_t *mac, IP6Address ip, IP6Address dns, IP6Address gateway, IP6Address subnet
 , IP6Address lla, IP6Address gua, IP6Address sn6, IP6Address gw6)
 {
