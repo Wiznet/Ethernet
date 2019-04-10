@@ -128,7 +128,7 @@ void setup() {
     // try to congifure using IP address instead of DHCP:
     Ethernet.begin(mac, ip, myDns, gateway, subnet, lla, gua, sn6, gw6);
   } else {
-    Serial.print("  DHCP assigned IP ");
+    Serial.println("  DHCP assigned IP ");
   }
 
   Ethernet.setDnsServerIP(ip6_dns6);
