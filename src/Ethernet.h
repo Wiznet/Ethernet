@@ -273,8 +273,7 @@ public:
 	static void begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet);
 	#endif
 
-	static void begin(uint8_t *mac, IP6Address ip, IP6Address dns, IP6Address gateway, IP6Address subnet
-	, IP6Address lla, IP6Address gua, IP6Address sn6, IP6Address gw6);
+	static void begin(uint8_t *mac, IP6Address ip, IP6Address dns, IP6Address gateway, IP6Address subnet, IP6Address lla, IP6Address gua, IP6Address sn6, IP6Address gw6);
 
 	static void init(uint8_t sspin = 10);
 

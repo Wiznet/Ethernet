@@ -32,6 +32,7 @@
 #define RESP_REFUSED             (5)
 #define RESP_MASK                (15)
 #define TYPE_A                   (0x0001)
+#define TYPE_AAA                 (0x001C)
 #define CLASS_IN                 (0x0001)
 #define LABEL_COMPRESSION_MASK   (0xC0)
 // Port number that DNS servers listen on
@@ -95,10 +96,12 @@ int DNSClient::getHostByName(const char* aHostname, IP6Address& aResult, uint16_
 		return 1;
 	}
 
+#if 0
 	// Check we've got a valid DNS server to use
 	if (iDNSServer == INADDR_NONE) {
 		return INVALID_SERVER;
 	}
+#endif
 	
 	// Find a socket to use
 	if (iUdp.begin(1024+(millis() & 0xF)) == 1) {
@@ -201,7 +204,7 @@ uint16_t DNSClient::BuildRequest(const char* aName)
 	len = 0;
 	iUdp.write(&len, sizeof(len));
 	// Finally the type and class of question
-	twoByteBuffer = htons(TYPE_A);
+	twoByteBuffer = htons(TYPE_AAA);
 	iUdp.write((uint8_t*)&twoByteBuffer, sizeof(twoByteBuffer));
 
 	twoByteBuffer = htons(CLASS_IN);  // Internet class of question
@@ -329,15 +332,19 @@ uint16_t DNSClient::ProcessResponse(uint16_t aTimeout, IP6Address& aAddress)
 		// Don't need header_flags anymore, so we can reuse it here
 		iUdp.read((uint8_t*)&header_flags, sizeof(header_flags));
 
-		if ( (htons(answerType) == TYPE_A) && (htons(answerClass) == CLASS_IN) ) {
-			if (htons(header_flags) != 4) {
+		if ( ((htons(answerType) == TYPE_A) || htons(answerType) == TYPE_AAA) && (htons(answerClass) == CLASS_IN) ) {
+			if (htons(header_flags) != 4 && htons(header_flags) != 16) {
 				// It's a weird size
 				// Mark the entire packet as read
 				iUdp.flush(); // FIXME
 				return -9;//INVALID_RESPONSE;
 			}
-			// FIXME: seeems to lock up here on ESP8266, but why??
-			iUdp.read(aAddress.raw_address(), 4);
+			if(htons(header_flags) == 4) {
+				// FIXME: seeems to lock up here on ESP8266, but why??
+				iUdp.read(aAddress.raw_address(), 4);
+			} else {
+				iUdp.read(aAddress.raw_address(), 16);
+			}
 			return SUCCESS;
 		} else {
 			// This isn't an answer type we're after, move onto the next one

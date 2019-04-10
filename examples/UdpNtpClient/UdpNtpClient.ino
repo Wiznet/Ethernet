@@ -28,9 +28,52 @@ byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
 };
 
+byte ip6_lla[] = {
+0xfe,0x80, 0x00,0x00,
+0x00,0x00, 0x00,0x00,
+0x02,0x00, 0xdc,0xff,
+0xfe,0x57, 0x57,0x61
+};
+
+byte ip6_gua[] = {
+0x20,0x01,0x02,0xb8,
+0x00,0x10,0xFF,0xFE,
+0x00,0x00,0xdc,0xff,
+0xfe,0x57,0x57,0x61
+};
+
+byte ip6_sn6[] = {
+0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,
+0x00,0x00,0x00, 0x00,
+0x00,0x00,0x00,0x00
+};
+
+byte ip6_gw6[] = {
+0xfe, 0x80, 0x00,0x00,
+0x00,0x00,0x00,0x00,
+0x02,0x00, 0x87,0xff,
+0xfe,0x08, 0x4c,0x81
+};
+
+// https://developers.google.com/speed/public-dns/docs/using
+// 2001:4860:4860::8888
+// 2001:4860:4860::8844
+
+byte ip6_dns6[] = {
+0x20, 0x01, 0x48, 0x60,
+0x48, 0x60, 0x00, 0x00,
+0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x88, 0x88
+};
+
 unsigned int localPort = 8888;       // local port to listen for UDP packets
 
+#if 1
+const char timeServer[] = "time.google.com"; // time.nist.gov NTP server
+#else
 const char timeServer[] = "time.nist.gov"; // time.nist.gov NTP server
+#endif
 
 const int NTP_PACKET_SIZE = 48; // NTP time stamp is in the first 48 bytes of the message
 
@@ -79,25 +122,26 @@ void setup() {
       delay(1);
     }
   }
-  // print your local IP address:
-  Serial.print("My IPv4 address: ");
-  Serial.println(Ethernet.localIP());
-
-  Serial.print("My IPv6 LLA: ");
-  Serial.println(Ethernet.linklocalAddress());
   
-  Serial.print("My IPv6 GUA: ");
-  Serial.println(Ethernet.globalunicastAddress());
+  // print your local IP address:
+  Serial.println("==================================================================");
+  Serial.println("Network Information");
+  Serial.println("==================================================================");
+  Serial.print("IPv4 ADR: "); Serial.println(Ethernet.localIP());
+  Serial.print("IPv6 LLA: "); Serial.println(Ethernet.linklocalAddress());
+  Serial.print("IPv6 GUA: "); Serial.println(Ethernet.globalunicastAddress());
+  Serial.print("IPv6 GAW: "); Serial.println(Ethernet.gateway6());
+  Serial.print("IPv6 SUB: "); Serial.println(Ethernet.subnetmask6());
+  Serial.print("IPv6 DNS: "); Serial.println(Ethernet.dnsServerIP());
+  Serial.println("==================================================================");
+
+  Ethernet.setDnsServerIP(ip6_dns6);
 
   Udp.begin(localPort);
 }
 
 void loop() {
-  #if 1
-  sendNTPpacket(ntp); // send an NTP packet to a time server
-  #else
   sendNTPpacket(timeServer); // send an NTP packet to a time server
-  #endif
 
   // wait to see if a reply is available
   delay(1000);
@@ -148,11 +192,7 @@ void loop() {
 }
 
 // send an NTP request to the time server at the given address
-#if 1
-void sendNTPpacket(IP6Address address) {
-#else
 void sendNTPpacket(const char * address) {
-#endif
   // set all bytes in the buffer to 0
   memset(packetBuffer, 0, NTP_PACKET_SIZE);
   // Initialize values needed to form NTP request

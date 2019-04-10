@@ -110,7 +110,7 @@ uint8_t AddressAutoConfig::Address_Auto_RSRA(uint8_t sn, uint8_t *icmpbuf, uint1
 
 	volatile uint16_t size;
 	volatile uint16_t size_rsr;
-	uint8_t destip[16];
+	uint8_t destip[16]={0,};
 	uint16_t destport;
 	uint8_t addr_len, o_len;
 	uint8_t flags;
@@ -124,7 +124,8 @@ uint8_t AddressAutoConfig::Address_Auto_RSRA(uint8_t sn, uint8_t *icmpbuf, uint1
 	uint32_t end_point;
 	uint8_t prefix_len, pi_flag;
 	uint32_t validtime, prefertime, dnstime;
-	uint8_t prefix[16];
+	uint8_t prefix[16]={0,};
+	uint8_t subnet[16]={0,};
 
 	if (W5100.readSLCR() != 0x00) //check clear CMD
 	{
@@ -300,8 +301,10 @@ uint8_t AddressAutoConfig::Address_Auto_RSRA(uint8_t sn, uint8_t *icmpbuf, uint1
 					for (int i = 0; i < prefix_len / 8; i++)
 					{
 						prefix[i] = *p++;
+						subnet[i] = prefix[i];
 					}
 					W5100.writeGUAR(prefix);
+					W5100.writeSUB6R(subnet);
 
 					while ((uint32_t)p != end_point)
 					{

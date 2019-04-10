@@ -25,7 +25,6 @@
 
 int EthernetClient::connect(const char * host, uint16_t port)
 {
-	PRINTLINE();
 	DNSClient dns; // Look up the host first
 	IP6Address remote_addr;
 
@@ -42,7 +41,6 @@ int EthernetClient::connect(const char * host, uint16_t port)
 
 int EthernetClient::connect(IP6Address ip, uint16_t port)
 {
-	PRINTLINE();
 	if (sockindex < MAX_SOCK_NUM) {
 		if (Ethernet.socketStatus(sockindex) != SnSR::CLOSED) {
 			Ethernet.socketDisconnect(sockindex); // TODO: should we call stop()?

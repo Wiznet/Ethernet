@@ -238,7 +238,7 @@ void EthernetClass::socketConnect(uint8_t s, uint8_t * addr, uint16_t port)
 	SPI.beginTransaction(SPI_ETHERNET_SETTINGS);
 	W5100.writeSnDIP6R(s, addr);
 	W5100.writeSnDPORT(s, port);
-	W5100.execCmdSn(s, Sock_CONNECT);
+	W5100.execCmdSn(s, Sock_CONNECT6);
 	SPI.endTransaction();
 }
 
@@ -512,9 +512,19 @@ bool EthernetClass::socketStartUDP(uint8_t s, uint8_t* addr, uint16_t port)
 	SPI.beginTransaction(SPI_ETHERNET_SETTINGS);
 	W5100.writeSnDIP6R(s, addr);
 	W5100.writeSnDPORT(s, port);
+#if 1
+	// 20190410
+	// Taylor
+	// Hop limit 0x80 / 128 as default
+	// If Hop limit too short, DNS Query Time Limited
+	W5100.writeSnTTL(s, 0x80);
+#else
 	// 20190319
-	// hot limit 0x01
+	// Taylor
+	// Hop limit 0x01
+	// Should be 0x01 ? Any case?
 	W5100.writeSnTTL(s, 0x01);
+#endif
 	SPI.endTransaction();
 	return true;
 }

@@ -40,6 +40,10 @@ uint8_t EthernetUDP::begin(uint16_t port)
 
 	if (sockindex < MAX_SOCK_NUM) Ethernet.socketClose(sockindex);
 	sockindex = Ethernet.socketBegin(SnMR::UDP6, port);
+
+	// Set Source IPv6 to GUA
+	W5100.writeSnPSR(sockindex, W6100_SnPSR_GUA);
+
 	if (sockindex >= MAX_SOCK_NUM) return 0;
 	_port = port;
 	_remaining = 0;

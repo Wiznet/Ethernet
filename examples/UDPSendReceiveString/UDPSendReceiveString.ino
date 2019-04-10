@@ -49,11 +49,15 @@ byte ip6_gw6[] = {
 0xfe,0x08, 0x4c,0x81
 };
 
-byte server_gua[] = {
-0x20,0x01,0x02,0xb8,
-0x00,0x10,0xFF,0xFE,
-0x11,0x8b,0x4d,0x1c,
-0x05,0x15,0x49,0x1a
+// https://developers.google.com/speed/public-dns/docs/using
+// 2001:4860:4860::8888
+// 2001:4860:4860::8844
+
+byte ip6_dns6[] = {
+0x20, 0x01, 0x48, 0x60,
+0x48, 0x60, 0x00, 0x00,
+0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x88, 0x88
 };
 
 IP6Address ip(192, 168, 0, 4);
@@ -85,11 +89,7 @@ void setup() {
   //Ethernet.init(33);  // ESP32 with Adafruit Featherwing Ethernet
 
   // start the Ethernet
-  #if 1
   Ethernet.begin(mac);
-  #else
-  Ethernet.begin(mac, ip, myDns, gateway, subnet, lla, gua, sn6, gw6);
-  #endif
 
   // Open serial communications and wait for port to open:
   Serial.begin(9600);
@@ -108,19 +108,23 @@ void setup() {
     Serial.println("Ethernet cable is not connected.");
   }
 
+  Serial.println("==================================================================");
+  Serial.println("Network Information");
+  Serial.println("==================================================================");
+  Serial.print("IPv4 ADR: "); Serial.println(Ethernet.localIP());
+  Serial.print("IPv6 LLA: "); Serial.println(Ethernet.linklocalAddress());
+  Serial.print("IPv6 GUA: "); Serial.println(Ethernet.globalunicastAddress());
+  Serial.print("IPv6 GAW: "); Serial.println(Ethernet.gateway6());
+  Serial.print("IPv6 SUB: "); Serial.println(Ethernet.subnetmask6());
+  Serial.print("IPv6 DNS: "); Serial.println(Ethernet.dnsServerIP());
+  Serial.println("==================================================================");
+
   // start UDP
   Udp.begin(localPort);
   
   Serial.println("UDPSendReceiveString address:");
-
-  Serial.print("My IPv4 address: ");
-  Serial.println(Ethernet.localIP());
-
-  Serial.print("My IPv6 LLA: ");
-  Serial.println(Ethernet.linklocalAddress());
-  
-  Serial.print("My IPv6 GUA: ");
-  Serial.println(Ethernet.globalunicastAddress());
+  Serial.print("IPv6 LLA: "); Serial.println(Ethernet.linklocalAddress());
+  Serial.print("IPv6 GUA: "); Serial.println(Ethernet.globalunicastAddress());
 }
 
 void loop() {

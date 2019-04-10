@@ -24,24 +24,77 @@
 
 #include <SPI.h>
 #include <Ethernet.h>
+#include "IP6Address.h"
 
 // assign a MAC address for the ethernet controller.
 // fill in your address here:
 byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
 };
+
+byte ip6_lla[] = {
+0xfe,0x80, 0x00,0x00,
+0x00,0x00, 0x00,0x00,
+0x02,0x00, 0xdc,0xff,
+0xfe,0x57, 0x57,0x61
+};
+
+byte ip6_gua[] = {
+0x20,0x01,0x02,0xb8,
+0x00,0x10,0xFF,0xFE,
+0x00,0x00,0xdc,0xff,
+0xfe,0x57,0x57,0x61
+};
+
+byte ip6_sn6[] = {
+0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,
+0x00,0x00,0x00, 0x00,
+0x00,0x00,0x00,0x00
+};
+
+byte ip6_gw6[] = {
+0xfe, 0x80, 0x00,0x00,
+0x00,0x00,0x00,0x00,
+0x02,0x00, 0x87,0xff,
+0xfe,0x08, 0x4c,0x81
+};
+
+// https://developers.google.com/speed/public-dns/docs/using
+// 2001:4860:4860::8888
+// 2001:4860:4860::8844
+
+byte ip6_dns6[] = {
+0x20, 0x01, 0x48, 0x60,
+0x48, 0x60, 0x00, 0x00,
+0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x88, 0x88
+};
+
 // Set the static IP address to use if the DHCP fails to assign
-IPAddress ip(192, 168, 0, 177);
-IPAddress myDns(192, 168, 0, 1);
+IP6Address ip(192, 168, 0, 177);
+IP6Address myDns(192, 168, 0, 1);
+IP6Address gateway(192, 168, 0, 1);
+IP6Address subnet(255, 255, 0, 0);
+
+IP6Address lla(ip6_lla, 16);
+IP6Address gua(ip6_gua, 16);
+IP6Address sn6(ip6_sn6, 16);
+IP6Address gw6(ip6_gw6, 16);
+IP6Address dns6(ip6_dns6, 16);
 
 // initialize the library instance:
 EthernetClient client;
 
+#if 1
+char server[] = "ipv6.google.com";
+#else
 char server[] = "www.arduino.cc";  // also change the Host line in httpRequest()
+#endif
 //IPAddress server(64,131,82,241);
 
 unsigned long lastConnectionTime = 0;           // last time you connected to the server, in milliseconds
-const unsigned long postingInterval = 10*1000;  // delay between updates, in milliseconds
+const unsigned long postingInterval = 30*1000;  // delay between updates, in milliseconds
 
 void setup() {
   // You can use Ethernet.init(pin) to configure the CS pin
@@ -73,15 +126,28 @@ void setup() {
       Serial.println("Ethernet cable is not connected.");
     }
     // try to congifure using IP address instead of DHCP:
-    Ethernet.begin(mac, ip, myDns);
-    Serial.print("My IP address: ");
-    Serial.println(Ethernet.localIP());
+    Ethernet.begin(mac, ip, myDns, gateway, subnet, lla, gua, sn6, gw6);
   } else {
     Serial.print("  DHCP assigned IP ");
-    Serial.println(Ethernet.localIP());
   }
+
+  Ethernet.setDnsServerIP(ip6_dns6);
+
+  Serial.println("==================================================================");
+  Serial.println("Network Information");
+  Serial.println("==================================================================");
+  Serial.print("IPv4 ADR: "); Serial.println(Ethernet.localIP());
+  Serial.print("IPv6 LLA: "); Serial.println(Ethernet.linklocalAddress());
+  Serial.print("IPv6 GUA: "); Serial.println(Ethernet.globalunicastAddress());
+  Serial.print("IPv6 GAW: "); Serial.println(Ethernet.gateway6());
+  Serial.print("IPv6 SUB: "); Serial.println(Ethernet.subnetmask6());
+  Serial.print("IPv6 DNS: "); Serial.println(Ethernet.dnsServerIP());
+  Serial.println("==================================================================");
+
   // give the Ethernet shield a second to initialize:
   delay(1000);
+  
+  httpRequest();
 }
 
 void loop() {
@@ -111,10 +177,17 @@ void httpRequest() {
   if (client.connect(server, 80)) {
     Serial.println("connecting...");
     // send the HTTP GET request:
+
+    #if 1
+    client.println("GET /search?q=arduino HTTP/1.1");
+    client.println("Host: ipv6.google.com");
+    client.println("Connection: close");
+    #else
     client.println("GET /latest.txt HTTP/1.1");
     client.println("Host: www.arduino.cc");
     client.println("User-Agent: arduino-ethernet");
     client.println("Connection: close");
+    #endif
     client.println();
 
     // note the time that the connection was made:

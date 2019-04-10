@@ -72,6 +72,7 @@ enum SockCMD {
   Sock_OPEN      = 0x01,
   Sock_LISTEN    = 0x02,
   Sock_CONNECT   = 0x04,
+  Sock_CONNECT6  = 0x84,
   Sock_DISCON    = 0x08,
   Sock_CLOSE     = 0x10,
   Sock_SEND      = 0x20,
@@ -225,6 +226,10 @@ public:
 
 #define W6100_SnMR_TCP4      ( 1<<0)
 #define W6100_SnMR_TCPD      (13<<0)
+
+#define W6100_SnPSR_AUTO      (0<<0)
+#define W6100_SnPSR_LLA       (2<<0)
+#define W6100_SnPSR_GUA       (3<<0)
 
 #define __GP_REGISTER8(name, address, adrss_w6100)        \
   static inline void write##name(uint8_t _data) {   \
@@ -438,6 +443,7 @@ public:
   __SOCKET_REGISTER_N(SnDIP6R,    0x0000, 0x0130, 16)     // Destination IP6 Addr
   __SOCKET_REGISTER8(SnPNR,    0x0000, 0x0100)            // IP Protocaol Number Register
   __SOCKET_REGISTER8(SnESR,    0x0000, 0x0031)            // SOCKET n Externsion Status Register
+  __SOCKET_REGISTER8(SnPSR,    0x0000, 0x0004)            // SOCKET n Prefer Source IPv6 Address Register
 
 #undef __SOCKET_REGISTER8
 #undef __SOCKET_REGISTER16

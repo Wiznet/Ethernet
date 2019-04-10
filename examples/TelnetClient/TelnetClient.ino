@@ -30,15 +30,17 @@ IP6Address ip(192, 168, 0, 4);
 // Enter the IP address of the server you're connecting to:
 byte ip6_server[] = {
 #if 1
+// Server 1
+0x20, 0x01, 0x02, 0xB8,
+0x00, 0x10, 0xFF, 0xFE,
+0x01, 0xEE, 0x42, 0xEE,
+0x4A, 0x03, 0xA2, 0x2E
+#else
+// Server 2
 0x20, 0x01, 0x02, 0xB8,
 0x00, 0x10, 0xFF, 0xFF,
 0x11, 0x8B, 0x4D, 0x1C,
 0x05, 0x15, 0x49, 0x1A
-#else
-0x26, 0x06, 0x47, 0x00,
-0x47, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x11, 0x11
 #endif
 };
 
@@ -80,21 +82,23 @@ void setup() {
     delay(500);
   }
 
-  Serial.print("My IPv4 address: ");
-  Serial.println(Ethernet.localIP());
-
-  Serial.print("My IPv6 LLA: ");
-  Serial.println(Ethernet.linklocalAddress());
-  
-  Serial.print("My IPv6 GUA: ");
-  Serial.println(Ethernet.globalunicastAddress());
+  Serial.println("==================================================================");
+  Serial.println("Network Information");
+  Serial.println("==================================================================");
+  Serial.print("IPv4 ADR: "); Serial.println(Ethernet.localIP());
+  Serial.print("IPv6 LLA: "); Serial.println(Ethernet.linklocalAddress());
+  Serial.print("IPv6 GUA: "); Serial.println(Ethernet.globalunicastAddress());
+  Serial.print("IPv6 GAW: "); Serial.println(Ethernet.gateway6());
+  Serial.print("IPv6 SUB: "); Serial.println(Ethernet.subnetmask6());
+  Serial.print("IPv6 DNS: "); Serial.println(Ethernet.dnsServerIP());
+  Serial.println("==================================================================");
 
   // give the Ethernet shield a second to initialize:
   delay(1000);
   Serial.println("connecting...");
 
   // if you get a connection, report back via serial:
-  if (client.connect(server, 23)) {
+  if (client.connect(server, 10002)) {
     Serial.println("connected");
   } else {
     // if you didn't get a connection to the server:

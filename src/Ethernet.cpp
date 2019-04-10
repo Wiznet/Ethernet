@@ -145,8 +145,8 @@ int EthernetClass::begin(uint8_t *mac, IP6Address ip, IP6Address dns, IP6Address
 	SPI.endTransaction();
 }
 
-void EthernetClass::begin(uint8_t *mac, IP6Address ip, IP6Address dns, IP6Address gateway, IP6Address subnet
-, IP6Address lla, IP6Address gua, IP6Address sn6, IP6Address gw6)
+void EthernetClass::begin(uint8_t *mac, IP6Address ip, IP6Address dns, IP6Address gateway, IP6Address subnet, 
+IP6Address lla, IP6Address gua, IP6Address sn6, IP6Address gw6)
 {
 //#error Ethernet.cpp 102
 

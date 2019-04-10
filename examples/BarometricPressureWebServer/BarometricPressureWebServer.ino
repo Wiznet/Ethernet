@@ -62,6 +62,17 @@ byte ip6_gw6[] = {
 0xfe,0x08, 0x4c,0x81
 };
 
+// https://developers.google.com/speed/public-dns/docs/using
+// 2001:4860:4860::8888
+// 2001:4860:4860::8844
+
+byte ip6_dns6[] = {
+0x20, 0x01, 0x48, 0x60,
+0x48, 0x60, 0x00, 0x00,
+0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x88, 0x88
+};
+
 IP6Address ip(192, 168, 0, 4);
 IP6Address myDns(192, 168, 0, 1);
 IP6Address gateway(192, 168, 0, 1);
@@ -125,19 +136,22 @@ void setup() {
     Serial.println("Ethernet cable is not connected.");
   }
 
+  Serial.println("==================================================================");
+  Serial.println("Network Information");
+  Serial.println("==================================================================");
+  Serial.print("IPv4 ADR: "); Serial.println(Ethernet.localIP());
+  Serial.print("IPv6 LLA: "); Serial.println(Ethernet.linklocalAddress());
+  Serial.print("IPv6 GUA: "); Serial.println(Ethernet.globalunicastAddress());
+  Serial.print("IPv6 GAW: "); Serial.println(Ethernet.gateway6());
+  Serial.print("IPv6 SUB: "); Serial.println(Ethernet.subnetmask6());
+  Serial.print("IPv6 DNS: "); Serial.println(Ethernet.dnsServerIP());
+  Serial.println("==================================================================");
+
   // start listening for clients
   server.begin(1);
-
   Serial.println("Web Server address:");
-  
-  Serial.print("My IPv4 address: ");
-  Serial.println(Ethernet.localIP());
-
-  Serial.print("My IPv6 LLA: ");
-  Serial.println(Ethernet.linklocalAddress());
-  
-  Serial.print("My IPv6 GUA: ");
-  Serial.println(Ethernet.globalunicastAddress());
+  Serial.print("IPv6 LLA: "); Serial.println(Ethernet.linklocalAddress());
+  Serial.print("IPv6 GUA: "); Serial.println(Ethernet.globalunicastAddress());
 
   // initalize the data ready and chip select pins:
   pinMode(dataReadyPin, INPUT);

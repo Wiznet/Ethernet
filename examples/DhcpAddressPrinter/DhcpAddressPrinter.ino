@@ -60,15 +60,20 @@ void setup() {
       delay(1);
     }
   }
-  // print your local IP address:
-  Serial.print("My IPv4 address: ");
-  Serial.println(Ethernet.localIP());
 
-  Serial.print("My IPv6 LLA: ");
-  Serial.println(Ethernet.linklocalAddress());
-  
-  Serial.print("My IPv6 GUA: ");
-  Serial.println(Ethernet.globalunicastAddress());
+  Serial.println("==================================================================");
+  Serial.println("Network Information");
+  Serial.println("==================================================================");
+  Serial.print("IPv4 ADR: "); Serial.println(Ethernet.localIP());
+  Serial.print("IPv6 LLA: "); Serial.println(Ethernet.linklocalAddress());
+  Serial.print("IPv6 GUA: "); Serial.println(Ethernet.globalunicastAddress());
+  Serial.print("IPv6 GAW: "); Serial.println(Ethernet.gateway6());
+  Serial.print("IPv6 SUB: "); Serial.println(Ethernet.subnetmask6());
+  Serial.print("IPv6 DNS: "); Serial.println(Ethernet.dnsServerIP());
+  Serial.println("==================================================================");
+
+  // print your local IP address:
+  Serial.print("IPv6 GUA: "); Serial.println(Ethernet.globalunicastAddress());
 }
 
 void loop() {
