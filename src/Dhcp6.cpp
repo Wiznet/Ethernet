@@ -175,9 +175,6 @@ int Dhcp6Class::request_DHCPV6_lease()
 			}
 
 			_lastCheckLeaseMillis = millis();
-#ifdef DHCP6_DEBUG
-			PRINTVAR(_lastCheckLeaseMillis);
-#endif
 			return 1;
 #if 0
 		case DHCP_FAILED:
@@ -201,11 +198,6 @@ int Dhcp6Class::request_DHCPV6_lease()
 		if ((millis() - startTime) > 60 * 1000)
 		{
 			Serial.println("DHCPv6 Time Out!");
-#ifdef DHCP6_DEBUG
-			PRINTVAR(millis());
-			PRINTVAR(startTime);
-			PRINTVAR(_timeout);
-#endif
 			my_dhcp_retry++;
 			if (my_dhcp_retry > MY_MAX_DHCP_RETRY)
 			{
@@ -225,7 +217,6 @@ int Dhcp6Class::request_DHCPV6_lease()
 	return 0;
 }
 
-/* SEND DHCPv6 SOLICIT */
 void Dhcp6Class::send_DHCPV6_SOLICIT(void)
 {
 	uint16_t j;
@@ -260,10 +251,6 @@ void Dhcp6Class::send_DHCPV6_SOLICIT(void)
 	DumpDhcpV6Option("option init");
 
 	AppendDhcpV6Option(DHCP6_SOLICIT);
-
-#ifdef DHCP6_DEBUG
-	PRINTVAR_HEX(DHCP_XID);
-#endif
 
 	AppendDhcpV6Option((uint8_t)((DHCP_XID & 0x00FF0000) >> 16));
 	AppendDhcpV6Option((uint8_t)((DHCP_XID & 0x00FF0000) >> 8));
@@ -351,19 +338,10 @@ void Dhcp6Class::send_DHCPV6_SOLICIT(void)
 
 	rip_msg_size = size;
 
-#ifdef DHCP6_DEBUG
-	PRINTSTR("> Send DHCP_DISCOVER\r\n");
-#endif
-
 	_dhcpUdpSocket.write((uint8_t *)pDHCPMSG.OPT, rip_msg_size);
 	_dhcpUdpSocket.endPacket();
-
-#ifdef DHCP6_DEBUG
-	PRINTSTR("> %d, %d\r\n", ret, rip_msg_size);
-#endif
 }
 
-/* SEND DHCPv6 REQUEST */
 uint8_t Dhcp6Class::send_DHCPV6_REQUEST(uint8_t type)
 {
 	//uint16_t i;
@@ -573,27 +551,14 @@ uint8_t Dhcp6Class::send_DHCPV6_REQUEST(uint8_t type)
 
 	rip_msg_size = size;
 
-#ifdef DHCP6_DEBUG
-	PRINTSTR("> Send DHCP_REQUEST\r\n");
-#endif
-
 	_dhcpUdpSocket.write((uint8_t *)pDHCPMSG.OPT, rip_msg_size);
 	_dhcpUdpSocket.endPacket();
-
-#ifdef DHCP6_DEBUG
-	PRINTVAR(ret);
-	PRINTVAR(rip_msg_size);
-#endif
 
 	return ret;
 }
 
 uint8_t Dhcp6Class::DHCPV6_run_stateful()
 {
-#ifdef DHCP6_DEBUG
-	PRINTSTR(DHCPV6_run_stateful());
-#endif
-
 	uint8_t type;
 	uint8_t ret;
 	uint8_t i;
@@ -605,9 +570,6 @@ uint8_t Dhcp6Class::DHCPV6_run_stateful()
 
 	ret = DHCP_RUNNING;
 	type = parseDHCPV6MSG();
-#ifdef DHCP6_DEBUG
-	PRINTVAR(type);
-#endif
 
 	switch (_dhcp_state)
 	{
@@ -632,24 +594,15 @@ uint8_t Dhcp6Class::DHCPV6_run_stateful()
 		break;
 
 	case STATE_DHCP6_REQUEST:
-#ifdef DHCP6_DEBUG
-		PRINTVAR_HEXN(recv_IP, 16, i);
-#endif
 
-#if 1
 		memcpy(_dhcpGua, recv_IP, 16);
-#else
-		W5100.setGlobalunicastAddress(recv_IP);
-#endif
 		_dhcp_state = STATE_DHCP6_LEASED;
 
 		return DHCP_IP_LEASED;
 		break;
 
 	case STATE_DHCP6_REREQUEST:
-#ifdef DHCP6_DEBUG
-		PRINTVAR_HEXN(recv_IP, 16, i);
-#endif
+
 		ret = send_DHCPV6_REQUEST(_dhcp_msg);
 		if (ret == 9)
 		{
@@ -660,9 +613,7 @@ uint8_t Dhcp6Class::DHCPV6_run_stateful()
 		break;
 
 	default:
-#ifdef DHCP6_DEBUG
-		PRINTVAR(_dhcp_state);
-#endif
+
 		if (type == DHCP6_REPLY)
 		{
 			_dhcp_state = STATE_DHCP6_LEASED;
@@ -676,9 +627,6 @@ uint8_t Dhcp6Class::DHCPV6_run_stateful()
 
 uint8_t Dhcp6Class::DHCPV6_run_stateless()
 {
-#ifdef DHCP6_DEBUG
-	PRINTSTR(DHCPV6_run_stateless());
-#endif
 	uint8_t type;
 	uint8_t ret;
 
@@ -836,26 +784,14 @@ uint8_t Dhcp6Class::send_DHCPV6_INFOREQ(void)
 
 	rip_msg_size = size;
 
-#ifdef DHCP6_DEBUG
-	PRINTSTR(> Send DHCP_REQUEST\r\n);
-#endif
-
 	_dhcpUdpSocket.write((uint8_t *)pDHCPMSG.OPT, rip_msg_size);
 	_dhcpUdpSocket.endPacket();
-
-#ifdef DHCP6_DEBUG
-	PRINTVAR(ret);
-	printvar(rip_msg_size);
-#endif
 
 	return ret;
 }
 
 int8_t Dhcp6Class::parseDHCPV6MSG()
 {
-#ifdef DHCP6_DEBUG
-	PRINTSTR(parseDHCPV6MSG());
-#endif
 	uint8_t svr_addr[16];
 	uint16_t svr_port;
 	uint8_t addlen;
@@ -894,9 +830,6 @@ int8_t Dhcp6Class::parseDHCPV6MSG()
 			switch (*p)
 			{
 			case OPT_CLIENTID:
-#ifdef DHCP6_DEBUG
-				PRINTSTR(OPT_CLIENTID);
-#endif
 				p++;
 
 				opt_len = (*p++ << 8);
@@ -910,9 +843,6 @@ int8_t Dhcp6Class::parseDHCPV6MSG()
 				break;
 
 			case OPT_IANA:
-#ifdef DHCP6_DEBUG
-				PRINTSTR(OPT_IANA);
-#endif
 				p++;
 				opt_len = (*p++ << 8);
 				iana_len = opt_len + (*p++);
@@ -929,9 +859,7 @@ int8_t Dhcp6Class::parseDHCPV6MSG()
 				_dhcpT1 = T1[0] | T1[1] << 8 | T1[2] << 16 | T1[3] << 24;
 				_dhcpT1 = ntohl(_dhcpT1); // sec
 				_renewInSec = _dhcpT1;
-#ifdef DHCP6_DEBUG
-				PRINTVAR(_dhcpT1);
-#endif
+
 				//T2
 				memcpy(T2, p, 4);
 				p += 4;
@@ -939,9 +867,7 @@ int8_t Dhcp6Class::parseDHCPV6MSG()
 				_dhcpT2 = T2[0] | T2[1] << 8 | T2[2] << 16 | T2[3] << 24;
 				_dhcpT2 = ntohl(_dhcpT2); // sec
 				_rebindInSec = _dhcpT2;
-#ifdef DHCP6_DEBUG
-				PRINTVAR(_dhcpT2);
-#endif
+
 				//IA_NA-options
 				while ((uint32_t)p < end_point)
 				{
@@ -949,9 +875,6 @@ int8_t Dhcp6Class::parseDHCPV6MSG()
 					switch (*p)
 					{
 					case OPT_IAADDR:
-#ifdef DHCP6_DEBUG
-						PRINTSTR(OPT_IAADDR);
-#endif
 						p++;
 						opt_len = (*p++ << 8);
 						iaaddr_len = opt_len + (*p++);
@@ -963,9 +886,6 @@ int8_t Dhcp6Class::parseDHCPV6MSG()
 						PreLifeTime += (*p++ << 16);
 						PreLifeTime += (*p++ << 8);
 						PreLifeTime += (*p++);
-#ifdef DHCP6_DEBUG
-						PRINTVAR(PreLifeTime); // sec
-#endif
 
 						ValidLifeTime = (*p++ << 24);
 						ValidLifeTime += (*p++ << 16);
@@ -973,15 +893,9 @@ int8_t Dhcp6Class::parseDHCPV6MSG()
 						ValidLifeTime += (*p++);
 
 						_dhcpLeaseTime = ValidLifeTime; // sec
-#ifdef DHCP6_DEBUG
-						PRINTVAR(_dhcpLeaseTime);
-#endif
 						break;
 
 					case OPT_STATUS_CODE:
-#ifdef DHCP6_DEBUG
-						PRINTSTR(OPT_STATUS_CODE);
-#endif
 						p++;
 						opt_len = (*p++ << 8);
 						statuscode_len = opt_len + (*p++);
@@ -1004,9 +918,6 @@ int8_t Dhcp6Class::parseDHCPV6MSG()
 				break;
 
 			case OPT_IATA:
-#ifdef DHCP6_DEBUG
-				PRINTSTR(OPT_IATA);
-#endif
 				p++;
 				opt_len = (*p++ << 8);
 				opt_len = opt_len + (*p++);
@@ -1015,9 +926,6 @@ int8_t Dhcp6Class::parseDHCPV6MSG()
 				break;
 
 			case OPT_SERVERID:
-#ifdef DHCP6_DEBUG
-				PRINTSTR(OPT_SERVERID);
-#endif
 				p++;
 				opt_len = (*p++ << 8);
 				serverid_len = opt_len + (*p++);
@@ -1056,9 +964,6 @@ int8_t Dhcp6Class::parseDHCPV6MSG()
 				break;
 
 			case DNS_RecursiveNameServer:
-#ifdef DHCP6_DEBUG
-				PRINTSTR(DNS_RecursiveNameServer);
-#endif
 				p++;
 				opt_len = (*p++ << 8);
 				opt_len = opt_len + (*p++);
@@ -1074,9 +979,6 @@ int8_t Dhcp6Class::parseDHCPV6MSG()
 				break;
 
 			case Domain_Search_List:
-#ifdef DHCP6_DEBUG
-				PRINTSTR(Domain_Search_List);
-#endif
 				p++;
 				opt_len = (*p++ << 8);
 				opt_len = opt_len + (*p++);
@@ -1149,9 +1051,6 @@ int Dhcp6Class::checkLease()
 	// if we have a lease but should renew, do it
 	if (_renewInSec == 0 && _dhcp_state == STATE_DHCP6_LEASED)
 	{
-#ifdef DHCP6_DEBUG
-		PRINTSTR(DHCP6 RENEW);
-#endif
 		_dhcp_state = STATE_DHCP6_REREQUEST;
 		_dhcp_msg = DHCP6_RENEW;
 
@@ -1166,9 +1065,6 @@ int Dhcp6Class::checkLease()
 	if (_rebindInSec == 0 && (_dhcp_state == STATE_DHCP6_LEASED ||
 							  _dhcp_state == STATE_DHCP6_INIT))
 	{
-#ifdef DHCP6_DEBUG
-		PRINTSTR(DHCP6 REBIND);
-#endif
 		_dhcp_state = STATE_DHCP6_INIT;
 		//_dhcp_msg = DHCP6_REBIND;
 

@@ -47,7 +47,7 @@
 // does not always seem to work in practice (maybe Wiznet bugs?)
 //#define ETHERNET_LARGE_BUFFERS
 
-#define USE_SERIAL_DEBUG_PRINT
+//#define USE_SERIAL_DEBUG_PRINT
 
 #ifdef USE_SERIAL_DEBUG_PRINT
 #define PRINTLINE_DEF(var)  \
