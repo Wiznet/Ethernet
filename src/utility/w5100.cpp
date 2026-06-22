@@ -58,6 +58,7 @@ uint8_t  W5100Class::ss_pin = SS_PIN_DEFAULT;
 uint16_t W5100Class::SSIZE = 2048;
 uint16_t W5100Class::SMASK = 0x07FF;
 #endif
+static bool initialized = false;
 W5100Class W5100;
 
 // pointers and bitmasks for optimized SS pin
@@ -84,9 +85,14 @@ W5100Class W5100;
 #endif
 
 
+void W5100Class::swReset(void)
+{
+	initialized = false;
+	chip = 0;
+}
+
 uint8_t W5100Class::init(void)
 {
-	static bool initialized = false;
 	uint8_t i;
 
 	if (initialized) return 1;
